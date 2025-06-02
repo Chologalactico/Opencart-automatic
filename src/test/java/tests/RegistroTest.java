@@ -6,7 +6,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 //IMPORT para google Chorome si en tal caso queremos cambiarlo pues modificamos esta
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.edge.EdgeDriver;
+//import org.openqa.selenium.edge.EdgeDriver;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -19,13 +19,13 @@ public class RegistroTest {
     @BeforeMethod
     public void setup() {
         // Ruta local del driver para Microsoft Edge
-        driver = new EdgeDriver();
+        //driver = new EdgeDriver();
         //Ruta local del driver para Google
-        //driver = new ChromeDriver();
+        driver = new ChromeDriver();
         driver.manage().window().maximize();
         driver.get("https://opencart.abstracta.us/");
     }
-
+    //
     @Test
     public void registrarUsuarios() {
         List<String[]> usuarios = ExcelUtils.leerExcel("src/main/resources/inputData.xlsx", "UsuariosRegistro");
