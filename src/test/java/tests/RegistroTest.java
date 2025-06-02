@@ -25,7 +25,8 @@ public class RegistroTest {
         driver.manage().window().maximize();
         driver.get("https://opencart.abstracta.us/");
     }
-    //
+    //Ultima prueba de gitHub
+
     @Test
     public void registrarUsuarios() {
         List<String[]> usuarios = ExcelUtils.leerExcel("src/main/resources/inputData.xlsx", "UsuariosRegistro");
