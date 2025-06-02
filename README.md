@@ -35,7 +35,7 @@ Desarrollar un framework de automatización siguiendo buenas prácticas, que per
 
 ## 📦 Instalación y Ejecución
 
-1. **Clona el repositorio**
+1. **Instalacion**
 
 ```bash
 git clone https://github.com/tu-usuario/nombre-del-repo.git
@@ -45,26 +45,20 @@ mvn clean install
 
 mvn test
 ```
-
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/nombre-del-repo.git
-
-# Crear nueva rama para trabajar
-git checkout -b nombre-de-tu-rama
-
+2. **Commit a una rama**
+```bash
 # Verificar los cambios pendientes
 git status
 
-# Añadir los cambios
+# Añadir todos los cambios
 git add .
 
 # Hacer commit con mensaje
-git commit -m "Descripción de los cambios"
+git commit -m "[ADD O UPDATE O DELETE ]Descripción de los cambios"       //Dependera de que si insertas algo nuevo o una actualizacion de variables
 
 # Subir la rama al repositorio remoto
 git push origin nombre-de-tu-rama
 
 # Actualizar tu rama con los últimos cambios de main
-git pull origin main
-
-
+git pull origin nombre-de-la-rama-que-quieres-traer-los-cambios
+```
