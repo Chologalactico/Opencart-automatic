@@ -47,14 +47,14 @@ mvn test
 ```
 2. **Commit a una rama**
 ```bash
-# Verificar los cambios pendientes
-git status
-
 # Añadir todos los cambios
 git add .
 
 # Hacer commit con mensaje
 git commit -m "[ADD O UPDATE O DELETE ]Descripción de los cambios"       //Dependera de que si insertas algo nuevo o una actualizacion de variables
+
+# Verificar los cambios pendientes
+git status
 
 # Subir la rama al repositorio remoto
 git push origin nombre-de-tu-rama
