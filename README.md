@@ -38,7 +38,7 @@ Desarrollar un framework de automatización siguiendo buenas prácticas, que per
 1. **Instalacion**
 
 ```bash
-git clone https://github.com/tu-usuario/nombre-del-repo.git
+git clone https://github.com/Chologalactico/Opencart-automatic.git
 cd nombre-del-repo
 
 mvn clean install
