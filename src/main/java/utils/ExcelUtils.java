@@ -14,7 +14,12 @@ public class ExcelUtils {
         try (FileInputStream fis = new FileInputStream(filePath);
              Workbook workbook = new XSSFWorkbook(fis)) {
             Sheet sheet = workbook.getSheet(sheetName);
+            boolean esPrimeraFila = true;
             for (Row row : sheet) {
+                if (esPrimeraFila) {
+                    esPrimeraFila = false;
+                    continue;
+                }
                 int cols = row.getLastCellNum();
                 String[] rowData = new String[cols];
                 for (int i = 0; i < cols; i++) {

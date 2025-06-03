@@ -1,38 +1,70 @@
 package pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import utils.WaitUtils;
 
-public class RegistroPage {
-    WebDriver driver;
+import java.util.ArrayList;
+import java.util.List;
+
+public class RegistroPage extends BasePage{
 
     public RegistroPage(WebDriver driver) {
-        this.driver = driver;
+        super(driver);
     }
 
-    public void abrirFormularioRegistro() {
-        WaitUtils.esperarElementoClickable(driver, By.linkText("My Account"), 10).click();
-        WaitUtils.esperarElementoClickable(driver, By.linkText("Register"), 10).click();
-    }
+    // Selectores
+    private By inputFirstname = By.id("input-firstname");
+    private By inputLastname = By.id("input-lastname");
+    private By inputEmail = By.id("input-email");
+    private By inputTelephone = By.id("input-telephone");
+    private By inputPassword = By.id("input-password");
+    private By inputConfirm = By.id("input-confirm");
+    private By checkboxAgree = By.name("agree");
+    private By submitButton = By.cssSelector("input[type='submit']");
+
+    private By mensajesError = By.cssSelector("div.text-danger");
+    private By alertaEmailRegistrado = By.cssSelector("div.alert.alert-danger.alert-dismissible");
 
     public void completarFormulario(String[] datos) {
-        WaitUtils.esperarElementoVisible(driver, By.id("input-firstname"), 10).sendKeys(datos[0]);
-        driver.findElement(By.id("input-lastname")).sendKeys(datos[1]);
-        driver.findElement(By.id("input-email")).sendKeys(datos[2]);
-        driver.findElement(By.id("input-telephone")).sendKeys(datos[3]);
-        driver.findElement(By.id("input-password")).sendKeys(datos[4]);
-        driver.findElement(By.id("input-confirm")).sendKeys(datos[4]);
-        driver.findElement(By.name("agree")).click();
-        driver.findElement(By.cssSelector("input[type='submit']")).click();
+        String nombre = datos[0];
+        String apellido = datos[1];
+        String email = limpiarDato(datos[2]);
+        String telefono = limpiarDato(datos[3]);
+        String password = limpiarDato(datos[4]);
+
+        WaitUtils.esperarElementoVisible(driver, inputFirstname, 10).sendKeys(nombre);
+        driver.findElement(inputLastname).sendKeys(apellido);
+        driver.findElement(inputEmail).sendKeys(email);
+        driver.findElement(inputTelephone).sendKeys(telefono);
+        driver.findElement(inputPassword).sendKeys(password);
+        driver.findElement(inputConfirm).sendKeys(password);
+        driver.findElement(checkboxAgree).click();
+        driver.findElement(submitButton).click();
     }
 
-    public String obtenerMensajeRegistro() {
-        return WaitUtils.esperarElementoVisible(driver, By.tagName("h1"), 10).getText();
+    public List<String> obtenerMensajesError() {
+        List<WebElement> errores = driver.findElements(mensajesError);
+        List<String> mensajes = new ArrayList<>();
+        for (WebElement error : errores) {
+            mensajes.add(error.getText());
+        }
+        return mensajes;
     }
 
-    public void continuarDespuesRegistro() {
-        driver.findElement(By.linkText("Continue")).click();
+    public boolean esEmailYaRegistrado() {
+        try {
+            return driver.findElement(alertaEmailRegistrado).isDisplayed();
+        } catch (NoSuchElementException e) {
+            return false;
+        }
     }
+
+    private String limpiarDato(String dato) {
+        if (dato == null) return "";
+        return dato.endsWith(".0") ? dato.replace(".0", "") : dato.trim();
+    }
+
 }
