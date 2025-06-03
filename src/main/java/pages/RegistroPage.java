@@ -13,12 +13,12 @@ public class RegistroPage {
     }
 
     public void abrirFormularioRegistro() {
-        driver.findElement(By.linkText("My Account")).click();
-        driver.findElement(By.linkText("Register")).click();
+        WaitUtils.esperarElementoClickable(driver, By.linkText("My Account"), 10).click();
+        WaitUtils.esperarElementoClickable(driver, By.linkText("Register"), 10).click();
     }
 
     public void completarFormulario(String[] datos) {
-        driver.findElement(By.id("input-firstname")).sendKeys(datos[0]);
+        WaitUtils.esperarElementoVisible(driver, By.id("input-firstname"), 10).sendKeys(datos[0]);
         driver.findElement(By.id("input-lastname")).sendKeys(datos[1]);
         driver.findElement(By.id("input-email")).sendKeys(datos[2]);
         driver.findElement(By.id("input-telephone")).sendKeys(datos[3]);
@@ -29,8 +29,7 @@ public class RegistroPage {
     }
 
     public String obtenerMensajeRegistro() {
-        WebElement mensaje = WaitUtils.esperarElemento(driver, By.tagName("h1"), 10);
-        return mensaje.getText();
+        return WaitUtils.esperarElementoVisible(driver, By.tagName("h1"), 10).getText();
     }
 
     public void continuarDespuesRegistro() {
