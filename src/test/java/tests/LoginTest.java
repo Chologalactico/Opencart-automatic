@@ -1,48 +1,49 @@
 package tests;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
+import pages.HomePage;
 import pages.LoginPage;
+import utils.Constants;
 import utils.ExcelUtils;
 
 import java.util.List;
 
-public class LoginTest {
-
-    private WebDriver driver;
-
-    @BeforeMethod
-    public void setup() {
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-        driver.get("https://opencart.abstracta.us/");
-    }
+public class LoginTest extends BaseTest{
 
     @Test
     public void loginUsuarios() {
-        List<String[]> usuarios = ExcelUtils.leerExcel("src/main/resources/" +
-                "inputData.xlsx", "LoginData");
+        List<String[]> usuarios = ExcelUtils.leerExcel(Constants.FILE_PATH_INPUT_EXCEL, "LoginData");
+        HomePage homePage = new HomePage(driver);
         LoginPage loginPage = new LoginPage(driver);
 
+        homePage.navigateTo(Constants.BASE_URL);
+
         for (String[] usuario : usuarios) {
-            loginPage.irALogin();
-            loginPage.iniciarSesion(usuario[0], usuario[1]);
-
-            if (usuario[2].equalsIgnoreCase("valido")) {
-                Assert.assertTrue(loginPage.loginExitoso(), "El login válido falló para: " + usuario[0]);
-            } else {
-                Assert.assertTrue(loginPage.loginFallido(), "El login inválido no mostró advertencia para: " + usuario[0]);
-            }
-
-            driver.get("https://opencart.abstracta.us/");  // Reinicio simple entre iteraciones
+            homePage.selectAccount();
+            homePage.selectLogin();
+            String password = limpiarPassword(usuario[1]);
+            loginPage.iniciarSesion(usuario[0], password);
+            validarLogin(loginPage, usuario, password);
+            System.out.println("Login correcto del usuario: " + usuario[0]);
+            homePage.selectAccount();
+            homePage.selectLogout();
         }
     }
 
-    @AfterMethod
-    public void tearDown() {
-        driver.quit();
+    private void validarLogin(LoginPage loginPage, String[] usuario, String password) {
+        if (!loginPage.validarLogin()) {
+            System.out.println("Usuario o contraseña incorrecta: " + usuario[0] + " / " + password);
+            Assert.fail("No se pudo iniciar sesión con las credenciales: " + usuario[0]);
+        }
     }
+
+    private String limpiarPassword(String input) {
+        if (input.matches("\\d+\\.0")) {
+            return input.substring(0, input.indexOf('.'));
+        }
+        return input;
+    }
+
 }

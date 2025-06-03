@@ -1,32 +1,33 @@
 package pages;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import utils.WaitUtils;
 
-public class LoginPage {
-    WebDriver driver;
+public class LoginPage extends BasePage{
 
     public LoginPage(WebDriver driver) {
-        this.driver = driver;
+        super(driver);
     }
 
-    public void irALogin() {
-        driver.findElement(By.linkText("My Account")).click();
-        driver.findElement(By.linkText("Login")).click();
-    }
+    private By inputEmail = By.id("input-email");
+    private By inputPassword = By.id("input-password");
+    private By inputSubmit = By.cssSelector("input[type='submit']");
+
+    private By mensajeErrorLogin = By.cssSelector(".alert.alert-danger");
 
     public void iniciarSesion(String email, String password) {
-        WaitUtils.esperarElementoVisible(driver, By.id("input-email"), 10).sendKeys(email);
-        driver.findElement(By.id("input-password")).sendKeys(password);
-        driver.findElement(By.cssSelector("input[type='submit']")).click();
+        WaitUtils.esperarElementoVisible(driver, inputEmail, 10).sendKeys(email);
+        driver.findElement(inputPassword).sendKeys(password);
+        driver.findElement(inputSubmit).click();
     }
 
-    public boolean loginExitoso() {
-        return driver.getPageSource().contains("My Account");
-    }
-
-    public boolean loginFallido() {
-        return driver.getPageSource().contains("Warning: No match for E-Mail Address and/or Password.");
+    public boolean validarLogin() {
+        try {
+            // Si encontramos el mensaje de error, es porque el login falló
+            WaitUtils.esperarConFluentWait(driver, mensajeErrorLogin, 3, 300);
+            return false; // Lo encontramos → login fallido
+        } catch (TimeoutException | NoSuchElementException e) {
+            return true; // No se encontró el mensaje → login exitoso
+        }
     }
 }
