@@ -15,24 +15,51 @@ public class ExcelUtils {
              Workbook workbook = new XSSFWorkbook(fis)) {
             Sheet sheet = workbook.getSheet(sheetName);
             boolean esPrimeraFila = true;
+
             for (Row row : sheet) {
                 if (esPrimeraFila) {
                     esPrimeraFila = false;
                     continue;
                 }
+
                 int cols = row.getLastCellNum();
                 String[] rowData = new String[cols];
+                boolean filaValida = false;
+
                 for (int i = 0; i < cols; i++) {
                     Cell cell = row.getCell(i);
-                    rowData[i] = cell != null ? cell.toString() : "";
+                    String valor = limpiarValorCelda(cell);
+                    rowData[i] = valor;
+
+                    // Verificamos si la primera celda (nombre del producto) no está vacía
+                    if (i == 0 && !valor.isEmpty()) {
+                        filaValida = true;
+                    }
                 }
-                data.add(rowData);
+
+                if (filaValida) {
+                    data.add(rowData);
+                }
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
         return data;
     }
+
+    // Limpieza de .0 y nulos
+    private static String limpiarValorCelda(Cell cell) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
+            return "";
+        }
+        String valor = cell.toString().trim();
+        if (valor.matches("^-?\\d+\\.0$")) {
+            valor = valor.substring(0, valor.length() - 2);
+        }
+        return valor;
+    }
+
 
     public static void escribirExcel(String filePath, String sheetName, List<String[]> data) {
         try (Workbook workbook = new XSSFWorkbook()) {
