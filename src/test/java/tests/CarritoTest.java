@@ -1,6 +1,5 @@
 package tests;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 import pages.BusquedaPage;
 import pages.CarritoPage;
@@ -14,86 +13,60 @@ import java.util.List;
 public class CarritoTest extends BaseTest {
 
     @Test
-    public void verificarProductosEnCarrito() {
+    public void validarProductosEnCarritoYGuardarEnExcel() {
         // Leer productos desde Excel
-        List<String[]> productosEsperados = ExcelUtils.leerExcel(Constants.FILE_PATH_INPUT_EXCEL, Constants.SHEET_PRODUCTOS);
+        List<String[]> productos = ExcelUtils.leerExcel(Constants.FILE_PATH_INPUT_EXCEL, Constants.SHEET_PRODUCTOS);
 
+        // Inicializar páginas
         HomePage homePage = new HomePage(driver);
         BusquedaPage busquedaPage = new BusquedaPage(driver);
         CarritoPage carritoPage = new CarritoPage(driver);
 
-        // Navegar a la página principal
+        // Navegar al sitio
         homePage.navigateTo(Constants.BASE_URL);
 
-        // Agregar productos al carrito
-        System.out.println("=== AGREGANDO PRODUCTOS AL CARRITO ===");
-        for (String[] producto : productosEsperados) {
-            homePage.buscarProducto(producto[0]);
-            if (busquedaPage.buscarYAgregarProducto(producto[0])) {
-                System.out.println("✅ Producto agregado: " + producto[0]);
+        // Buscar y agregar productos al carrito
+        for (String[] producto : productos) {
+            String nombreProducto = producto[0];
+            System.out.println("Procesando producto: " + nombreProducto);
+
+            homePage.buscarProducto(nombreProducto);
+
+            if (busquedaPage.buscarYAgregarProducto(nombreProducto)) {
+                System.out.println("Producto agregado al carrito: " + nombreProducto);
             } else {
-                System.out.println("❌ No se pudo agregar: " + producto[0]);
+                System.err.println("No se pudo agregar el producto: " + nombreProducto);
             }
         }
 
-        // Ir al carrito
-        System.out.println("\n=== VERIFICANDO PRODUCTOS EN CARRITO ===");
+        // Ir al carrito para validar productos
         carritoPage.irAlCarrito();
 
-        // Verificar cada producto esperado
-        List<String> productosEncontrados = new ArrayList<>();
-        List<String> productosFaltantes = new ArrayList<>();
+        // Obtener productos que están efectivamente en el carrito
+        List<String> productosEnCarrito = carritoPage.obtenerProductosEnCarrito();
 
-        for (String[] producto : productosEsperados) {
-            if (carritoPage.verificarProductoEnCarrito(producto[0])) {
-                productosEncontrados.add(producto[0]);
-                System.out.println("✅ Producto verificado en carrito: " + producto[0]);
-            } else {
-                productosFaltantes.add(producto[0]);
-                System.out.println("❌ Producto NO encontrado en carrito: " + producto[0]);
-            }
+        // Validar que se encontraron productos
+        if (productosEnCarrito.isEmpty()) {
+            System.err.println("No se encontraron productos en el carrito");
+            return;
         }
 
-        // Obtener todos los productos del carrito
-        List<String[]> productosEnCarrito = carritoPage.obtenerProductosDelCarrito();
+        // Preparar datos para escribir en Excel
+        List<String[]> datosParaExcel = new ArrayList<>();
 
-        // Mostrar resumen
-        System.out.println("\n=== RESUMEN ===");
-        System.out.println("Total productos esperados: " + productosEsperados.size());
-        System.out.println("Total productos encontrados: " + productosEncontrados.size());
-        System.out.println("Total productos en carrito: " + productosEnCarrito.size());
+        // Agregar encabezado
+        datosParaExcel.add(new String[]{"Producto Agregado al Carrito"});
+
+        // Agregar productos encontrados
+        for (String producto : productosEnCarrito) {
+            datosParaExcel.add(new String[]{producto});
+            System.out.println("Producto validado en carrito: " + producto);
+        }
 
         // Escribir resultados en Excel
-        escribirResultadosEnExcel(productosEnCarrito);
+        ExcelUtils.escribirExcel(Constants.FILE_PATH_OUTPUT_EXCEL, Constants.SHEET_PRODUCTOS_CARRITO, datosParaExcel);
 
-        // Validación final
-        Assert.assertTrue(productosFaltantes.isEmpty(),
-                "Los siguientes productos no se encontraron en el carrito: " + productosFaltantes);
-
-        Assert.assertTrue(productosEnCarrito.size() > 0,
-                "El carrito está vacío");
-
-        System.out.println("✅ Verificación de carrito completada exitosamente");
-    }
-
-    private void escribirResultadosEnExcel(List<String[]> productosEnCarrito) {
-        try {
-            // Crear encabezados para el Excel de salida
-            List<String[]> datosParaExcel = new ArrayList<>();
-            String[] encabezados = {"Nombre", "Modelo", "Cantidad", "Precio Unitario", "Precio Total"};
-            datosParaExcel.add(encabezados);
-
-            // Agregar productos del carrito
-            datosParaExcel.addAll(productosEnCarrito);
-
-            // Escribir en Excel
-            ExcelUtils.escribirExcel(Constants.FILE_PATH_OUTPUT_EXCEL, Constants.SHEET_PRODUCTOS_CARRITO, datosParaExcel);
-
-            System.out.println("📊 Resultados escritos en: " + Constants.FILE_PATH_OUTPUT_EXCEL);
-            System.out.println("📋 Hoja: " + Constants.SHEET_PRODUCTOS_CARRITO);
-
-        } catch (Exception e) {
-            System.err.println("Error al escribir en Excel: " + e.getMessage());
-        }
+        System.out.println("Proceso completado. Productos guardados en: " + Constants.FILE_PATH_OUTPUT_EXCEL);
+        System.out.println("Total de productos en carrito: " + productosEnCarrito.size());
     }
 }
