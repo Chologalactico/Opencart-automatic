@@ -1,64 +1,79 @@
-# 🤖 Automatización y Evaluación de Atributos de Calidad - OpenCart
+# 🤖 Automation and Quality Attributes Evaluation - OpenCart
 
-Este proyecto consiste en un conjunto de pruebas automatizadas desarrolladas en **Java** utilizando **Selenium WebDriver**, con el objetivo de evaluar el sitio de demostración de OpenCart.
+This project consists of a set of automated tests developed in **Java** using **Selenium WebDriver**, with the goal of evaluating the OpenCart demo website.
 
-## 🌐 Sitio Web Objetivo
+---
+
+## 🌐 Target Website
 
 [https://opencart.abstracta.us/](https://opencart.abstracta.us/)
 
-## 🚀 Tecnologías Utilizadas
+---
+
+## 🚀 Technologies Used
 
 - Java  
 - Selenium WebDriver  
 - Maven  
-- Apache POI (para manejo de Excel)  
-- Patrón de diseño Page Object Model (POM)  
+- Apache POI (for Excel handling)  
+- Page Object Model (POM) design pattern  
 
-## 🎯 Objetivo del Proyecto
+---
 
-Desarrollar un framework de automatización siguiendo buenas prácticas, que permita evaluar atributos de calidad como:
+## 🎯 Project Objective
 
-- Diseño estructurado de pruebas
-- Selección eficiente de selectores
-- Sincronización adecuada
-- Validaciones precisas
-- Manejo de datos externos mediante Excel
+Develop an automation framework following best practices, aimed at evaluating quality attributes such as:
 
+- Structured test design  
+- Efficient selector usage  
+- Proper synchronization  
+- Accurate validations  
+- External data handling via Excel  
 
-## 🧩 Requisitos Previos
+---
 
-- Java JDK 8+
-- Maven
-- Google Chrome (última versión)
-- ChromeDriver (compatible con tu navegador)
-- IDE (recomendado: IntelliJ IDEA o Eclipse)
+## 🧩 Prerequisites
 
-## 📦 Instalación y Ejecución
+Before running the project, make sure you have the following installed:
 
-1. **Instalacion**
+- Java JDK 8+  
+- Maven  
+- Google Chrome (latest version)  
+- ChromeDriver (compatible with your browser version)  
+- An IDE (recommended: IntelliJ IDEA or Eclipse)  
+
+---
+
+## 📦 Installation and Execution
+
+### 1. Installation
+
+Clone the repository and run the tests:
 
 ```bash
 git clone https://github.com/Chologalactico/Opencart-automatic.git
-cd nombre-del-repo
+cd your-repo-name
 
 mvn clean install
 
 mvn test
+
 ```
 2. **Commit a una rama**
 ```bash
-# Añadir todos los cambios
+# Add all changes
 git add .
 
-# Hacer commit con mensaje
-git commit -m "[ADD O UPDATE O DELETE ]Descripción de los cambios"       //Dependera de que si insertas algo nuevo o una actualizacion de variables
+# Commit with a message
+git commit -m "[ADD or UPDATE or DELETE] Description of the changes"  # Use ADD for new content, UPDATE for modifications, DELETE for removals
 
-# Verificar los cambios pendientes
+# Check pending changes
 git status
 
-# Subir la rama al repositorio remoto
-git push origin nombre-de-tu-rama
+# Push your branch to the remote repository
+git push origin your-branch-name
 
-# Actualizar tu rama con los últimos cambios de main
-git pull origin nombre-de-la-rama-que-quieres-traer-los-cambios
+# Pull latest changes from another branch (e.g., main)
+git pull origin branch-name-you-want-to-pull-from
+
 ```
