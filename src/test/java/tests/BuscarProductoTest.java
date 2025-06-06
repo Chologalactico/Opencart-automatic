@@ -27,9 +27,9 @@ public class BuscarProductoTest extends BaseTest{
             boolean exito = busquedaPage.buscarYAgregarProducto(producto[0]);
 
             if (exito) {
-                System.out.println("✅ Producto agregado al carrito: " + producto[0]);
+                System.out.println("Producto agregado al carrito: " + producto[0]);
             } else {
-                errores.append("❌ El producto no se encontró o falló al agregar: ").append(producto[0]).append("\n");
+                errores.append("El producto no se encontró o falló al agregar: ").append(producto[0]).append("\n");
             }
         }
 
