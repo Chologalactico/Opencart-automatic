@@ -66,5 +66,31 @@ public class RegistroPage extends BasePage{
         if (dato == null) return "";
         return dato.endsWith(".0") ? dato.replace(".0", "") : dato.trim();
     }
+    // Verifica que los datos no sean nulos o vacíos y que el email tenga formato válido
+    public boolean datosValidos(String[] usuario) {
+        if (usuario.length < 5) return false;
+
+        String nombre = usuario[0];
+        String apellido = usuario[1];
+        String email = usuario[2];
+        String telefono = usuario[3];
+        String password = usuario[4];
+
+        return !(esNuloOVacio(nombre) || esNuloOVacio(apellido) || !esEmailValido(email) ||
+                esNuloOVacio(telefono) || esNuloOVacio(password));
+    }
+
+    private boolean esNuloOVacio(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    private boolean esEmailValido(String email) {
+        return email != null && email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // Para mostrar información del usuario en los mensajes de error
+    public String mostrarUsuario(String[] usuario) {
+        return (usuario.length >= 3) ? usuario[0] + " " + usuario[1] + " (" + usuario[2] + ")" : "Datos incompletos";
+    }
 
 }

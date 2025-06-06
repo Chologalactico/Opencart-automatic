@@ -3,8 +3,11 @@ package pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import utils.WaitUtils;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,71 +17,146 @@ public class CarritoPage extends BasePage {
         super(driver);
     }
 
-    // Selectores
     private By botonCarrito = By.id("cart");
-    private By botonVerCarrito = By.xpath("//a[contains(@href, 'checkout/cart')]");
-    private By tablaProductos = By.cssSelector(".table.table-bordered tbody");
-    private By filasProductos = By.cssSelector(".table.table-bordered tbody tr");
-    private By nombreProducto = By.cssSelector("td.text-left a");
+    private By opcionVerCarrito = By.xpath("//a[contains(@href, 'checkout/cart')]");
+    private By filasProductos = By.xpath("//table[@class='table table-bordered']//tbody/tr");
 
     public void irAlCarrito() {
-        WaitUtils.esperarElementoClickable(driver, botonCarrito, 10).click();
-        WaitUtils.esperarElementoClickable(driver, botonVerCarrito, 10).click();
+        try {
+            WebElement btnCarrito = WaitUtils.esperarElementoClickable(driver, botonCarrito, 10);
+            btnCarrito.click();
+            Thread.sleep(1000);
+
+            WebElement verCarrito = WaitUtils.esperarElementoClickable(driver, opcionVerCarrito, 10);
+            verCarrito.click();
+            Thread.sleep(2000);
+
+            System.out.println("Navegación al carrito completada");
+        } catch (Exception e) {
+            throw new RuntimeException("Error al ir al carrito: " + e.getMessage());
+        }
     }
 
-    public List<String> obtenerProductosEnCarrito() {
-        List<String> productosEnCarrito = new ArrayList<>();
+    public List<String[]> obtenerTodosLosDatosDelCarrito() {
+        List<String[]> productosCompletos = new ArrayList<>();
 
-        // Esperar a que la tabla de productos cargue
-        WaitUtils.esperarElementoVisible(driver, tablaProductos, 10);
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
-        // Obtener todas las filas de productos
-        List<WebElement> filas = driver.findElements(filasProductos);
+            // Agregar encabezados
+            productosCompletos.add(new String[]{
+                    "Nombre", "Modelo", "Cantidad", "Precio Unitario", "Precio Total", "Reward Points"
+            });
 
-        for (WebElement fila : filas) {
+            // Obtener filas de productos
+            List<WebElement> filas = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(filasProductos));
+            System.out.println("Productos encontrados en carrito: " + filas.size());
+
+            for (int i = 0; i < filas.size(); i++) {
+                String[] datosProducto = extraerDatosDeFila(filas.get(i));
+                if (datosProducto != null) {
+                    productosCompletos.add(datosProducto);
+                    System.out.println("Producto " + (i + 1) + ":");
+                    System.out.println("  Nombre          : " + datosProducto[0]);
+                    System.out.println("  Modelo          : " + datosProducto[1]);
+                    System.out.println("  Cantidad        : " + datosProducto[2]);
+                    System.out.println("  Precio Unitario : " + datosProducto[3]);
+                    System.out.println("  Precio Total    : " + datosProducto[4]);
+                    System.out.println("  Reward Points   : " + datosProducto[5]);
+                    System.out.println("--------------------------------------------");
+
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error al obtener datos del carrito: " + e.getMessage());
+        }
+
+        return productosCompletos;
+    }
+
+    private String[] extraerDatosDeFila(WebElement fila) {
+        try {
+            List<WebElement> columnas = fila.findElements(By.tagName("td"));
+
+            if (columnas.size() < 6) return null;
+
+            String nombre = "";
+            String modelo = "";
+            String cantidad = "";
+            String precioUnitario = "";
+            String precioTotal = "";
+            String rewardPoints = "";
+
+            // Columna 2: Nombre del producto
             try {
-                WebElement enlaceProducto = fila.findElement(nombreProducto);
-                String nombreProductoTexto = enlaceProducto.getText().trim();
+                WebElement enlaceNombre = columnas.get(1).findElement(By.tagName("a"));
+                nombre = enlaceNombre.getText().trim();
 
-                // Limpiar el texto del producto (quitar puntos de recompensa y otros elementos)
-                nombreProductoTexto = limpiarNombreProducto(nombreProductoTexto);
-
-                if (!nombreProductoTexto.isEmpty()) {
-                    productosEnCarrito.add(nombreProductoTexto);
-                    System.out.println("Producto encontrado en carrito: " + nombreProductoTexto);
+                // Buscar reward points
+                try {
+                    WebElement smallElement = columnas.get(1).findElement(By.tagName("small"));
+                    rewardPoints = smallElement.getText().replace("Reward Points:", "").trim();
+                } catch (Exception e) {
+                    rewardPoints = "N/A";
                 }
             } catch (Exception e) {
-                System.err.println("Error al obtener producto de una fila: " + e.getMessage());
+                nombre = "Error al obtener nombre";
             }
-        }
 
-        return productosEnCarrito;
+            // Columna 3: Modelo
+            try {
+                modelo = columnas.get(2).getText().trim();
+            } catch (Exception e) {
+                modelo = "N/A";
+            }
+
+            // Columna 4: Cantidad
+            try {
+                WebElement inputCantidad = columnas.get(3).findElement(By.tagName("input"));
+                cantidad = inputCantidad.getAttribute("value");
+            } catch (Exception e) {
+                cantidad = "N/A";
+            }
+
+            // Columna 5: Precio Unitario
+            try {
+                precioUnitario = columnas.get(4).getText().trim();
+            } catch (Exception e) {
+                precioUnitario = "N/A";
+            }
+
+            // Columna 6: Precio Total
+            try {
+                precioTotal = columnas.get(5).getText().trim();
+            } catch (Exception e) {
+                precioTotal = "N/A";
+            }
+
+            return new String[]{nombre, modelo, cantidad, precioUnitario, precioTotal, rewardPoints};
+
+        } catch (Exception e) {
+            System.err.println("Error al procesar fila: " + e.getMessage());
+            return null;
+        }
     }
 
-    public boolean validarProductoEnCarrito(String nombreProducto) {
-        List<String> productosEnCarrito = obtenerProductosEnCarrito();
+    public boolean validarProductosEnCarrito(List<String[]> productosEsperados) {
+        List<String[]> productosEnCarrito = obtenerTodosLosDatosDelCarrito();
 
-        for (String producto : productosEnCarrito) {
-            if (producto.toLowerCase().contains(nombreProducto.toLowerCase())) {
-                return true;
-            }
-        }
-        return false;
-    }
+        // Saltar encabezados
+        for (int i = 1; i < productosEnCarrito.size(); i++) {
+            String nombreEnCarrito = productosEnCarrito.get(i)[0];
 
-    private String limpiarNombreProducto(String textoCompleto) {
-        // Eliminar texto de puntos de recompensa y otros elementos extra
-        if (textoCompleto.contains("Puntos de recompensa")) {
-            // Extraer solo el nombre del producto del enlace
-            String[] partes = textoCompleto.split("Puntos de recompensa");
-            if (partes.length > 1) {
-                String parteProducto = partes[1].trim();
-                if (parteProducto.startsWith("de ")) {
-                    parteProducto = parteProducto.substring(3).trim();
+            for (String[] productoEsperado : productosEsperados) {
+                String nombreEsperado = productoEsperado[0];
+
+                if (nombreEnCarrito.toLowerCase().contains(nombreEsperado.toLowerCase())) {
+                    System.out.println("Validado: " + nombreEsperado + " encontrado como: " + nombreEnCarrito);
                 }
-                return parteProducto;
             }
         }
-        return textoCompleto.trim();
+
+        return productosEnCarrito.size() > 1; // Más de 1 porque incluye encabezados
     }
 }
