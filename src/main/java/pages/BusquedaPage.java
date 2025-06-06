@@ -25,17 +25,31 @@ public class BusquedaPage extends BasePage {
     private By mensajeExito = By.cssSelector(".alert.alert-success");
 
     public boolean buscarYAgregarProducto(String nombreProducto) {
-        List<WebElement> listaProductos = driver.findElements(productos);
-        for (WebElement producto : listaProductos) {
-            String titulo = producto.findElement(tituloProducto).getText().trim();
-            if (titulo.toLowerCase().contains(nombreProducto.toLowerCase())) {
-                producto.findElement(botonAgregarAlCarrito).click();
-
-                // Validar que apareció el mensaje de éxito y contiene el producto correcto
-                return validarProductoAgregado(nombreProducto);
+        try {
+            List<WebElement> listaProductos = driver.findElements(productos);
+            if (listaProductos.isEmpty()) {
+                System.err.println("No se encontraron productos en la página.");
+                return false;
             }
+
+            for (WebElement producto : listaProductos) {
+                String titulo = producto.findElement(tituloProducto).getText().trim();
+                if (titulo.toLowerCase().contains(nombreProducto.toLowerCase())) {
+                    producto.findElement(botonAgregarAlCarrito).click();
+
+                    // Validar mensaje
+                    return validarProductoAgregado(nombreProducto);
+                }
+            }
+
+            System.err.println("Producto no encontrado: " + nombreProducto + ". Verifica que el nombre sea correcto.");
+            return false;
+
+        } catch (Exception e) {
+            System.err.println("Ocurrió un error al buscar/agregar el producto: " + nombreProducto);
+            System.err.println("Detalles: " + e.getMessage());
+            return false;
         }
-        return false; // Producto no encontrado
     }
 
     private boolean validarProductoAgregado(String nombreProducto) {

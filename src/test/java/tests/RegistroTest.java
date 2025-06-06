@@ -24,22 +24,71 @@ public class RegistroTest extends BaseTest {
 
         homePage.navigateTo(Constants.BASE_URL);
 
+        StringBuilder errores = new StringBuilder();
+
         for (String[] usuario : usuarios) {
-            homePage.selectAccount();
-            homePage.selectRegister();
+            try {
+                // Validar datos básicos antes de continuar
+                if (!registroPage.datosValidos(usuario)) {
+                    String mensaje = "Datos inválidos o incompletos para el usuario: " + registroPage.mostrarUsuario(usuario);
+                    System.out.println(mensaje);
+                    errores.append(mensaje).append("\n");
+                    continue;
+                }
 
-            registroPage.completarFormulario(usuario);
+                homePage.selectAccount();
+                homePage.selectRegister();
 
-            verificarEmailDuplicado(registroPage, usuario);
-            verificarErroresFormulario(registroPage);
-            verificarRegistroExitoso(confirmacionRegistroPage, usuario);
+                registroPage.completarFormulario(usuario);
 
-            confirmacionRegistroPage.continuarDespuesRegistro();
-            homePage.selectAccount();
-            homePage.selectLogout();
-            logoutPage.continuarDespuesLogout();
+                // Validar si el email ya está registrado
+                if (registroPage.esEmailYaRegistrado()) {
+                    String mensaje = "Email ya registrado: " + usuario[2];
+                    System.out.println(mensaje);
+                    errores.append(mensaje).append("\n");
+                    continue;
+                }
+
+                // Validar errores de formulario
+                List<String> erroresFormulario = registroPage.obtenerMensajesError();
+                if (!erroresFormulario.isEmpty()) {
+                    String mensaje = "Errores en formulario para: " + usuario[2] + "\n";
+                    for (String error : erroresFormulario) {
+                        mensaje += "   - " + error + "\n";
+                    }
+                    System.out.println(mensaje);
+                    errores.append(mensaje).append("\n");
+                    continue;
+                }
+
+                // Validar mensaje de éxito
+                String mensajeExito = confirmacionRegistroPage.obtenerMensajeRegistro();
+                if (!mensajeExito.contains("Congratulations")) {
+                    String mensaje = "Registro fallido para: " + usuario[2] + " - Mensaje: " + mensajeExito;
+                    System.out.println(mensaje);
+                    errores.append(mensaje).append("\n");
+                    continue;
+                }
+
+                System.out.println("Usuario registrado con éxito: " + usuario[2]);
+
+                confirmacionRegistroPage.continuarDespuesRegistro();
+                homePage.selectAccount();
+                homePage.selectLogout();
+                logoutPage.continuarDespuesLogout();
+
+            } catch (Exception e) {
+                String mensaje = "Excepción inesperada con el usuario " + registroPage.mostrarUsuario(usuario) + ": " + e.getMessage();
+                System.err.println(mensaje);
+                errores.append(mensaje).append("\n");
+            }
+        }
+
+        if (errores.length() > 0) {
+            Assert.fail("Se encontraron errores durante el registro:\n" + errores);
         }
     }
+
 
     private void verificarEmailDuplicado(RegistroPage registroPage, String[] usuario) {
         if (registroPage.esEmailYaRegistrado()) {
